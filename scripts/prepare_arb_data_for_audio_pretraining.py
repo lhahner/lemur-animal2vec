@@ -27,7 +27,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 def list_of_strings(arg):
     return arg.split(',')
 
-
+'''
+Provides the different options for the script to run.
+:return: instance of parser with the used arguments.
+'''
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -38,7 +41,7 @@ def get_parser():
     )
     parser.add_argument(
         "--resample-rate",
-        default=8000,
+        default=16000,
         type=int,
         help="Sample rate to which everything is resampled",
     )
@@ -60,7 +63,7 @@ def get_parser():
              "used if this flag were false",
     )
     parser.add_argument(
-        "--base-name", default="MeerKAT",
+        "--base-name", default="Lemurs",
         type=str, metavar="DIR", help="The base name for this project. "
                                       "The output folder will have this a prefix"
     )
@@ -234,9 +237,10 @@ def iteration(file, args, id_generator, labels, channel_dict):
                     end_frame_lbl.append(np.ceil(end_time_lbl[-1] * args.resample_rate).astype(int))
 
                     lbl.append(file_labels.iloc[lbl_i])
-                    foc.append(1 if file_focal_labels.iloc[lbl_i].lower() == "focal" else 0)
+                    foc.append(1 if file_focal_labels.iloc[lbl_i] else 0)
 
                     lbl_cat.append(args.unique_labels.index(lbl[-1]))
+                    print(args.unique_labels.index(lbl[-1]))
                     total_duration.append(end_time_lbl[-1] - start_time_lbl[-1])
 
         if not os.path.isdir(out_folder_lbl):
@@ -318,10 +322,10 @@ def main(args):
             futures = [executor.submit(partial_iteration, data) for data in files]
 
             results = []
-            for future in as_completed(futures):
-                result = future.result()  # Get the result (optional)
-                results.append(result)
-                pbar.update(1)  # Update the progress bar
+          #  for future in as_completed(futures):
+            #    result = future.result()  # Get the result (optional)
+            #    results.append(result)
+            #    pbar.update(1)  # Update the progress bar
 
     total_duration = sum([x[0] for x in results])
     c_ = sum([x[1] for x in results])
@@ -340,7 +344,7 @@ def main(args):
                 f.write("\t".join([k, v]) + "\n")  # write dictionary -> tab separated
 
     print("Total duration of all calls in all files: {:02.02f}s".format(np.sum(total_duration)), flush=True)
-    print("Total number of all files: {:02.00f}".format(len(total_duration)), flush=True)
+   # print("Total number of all files: {:02.00f}".format(len(total_duration)), flush=True)
 
 
 if __name__ == "__main__":

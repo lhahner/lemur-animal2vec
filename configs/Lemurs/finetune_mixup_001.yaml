@@ -1,0 +1,180 @@
+# @package _group_
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d_%H-%M-%S}_ft_few_0-1_1-2
+
+common:
+  fp16: true
+  log_format: json
+  log_interval: 11  # this is in steps, not epochs ... log every three epochs.
+  tensorboard_logdir: tb
+  all_gather_list_size: 6500000
+
+checkpoint:
+  save_interval: 119  # that is every 430 updates
+  keep_last_epochs: 10  # keep roughly all seven finetuning and the last three freeze update checkpoints
+  best_checkpoint_metric: metrics/finetune/f1
+
+task:
+  _name: audio_ccas
+  data: /path/to/manifest_files
+  max_sample_size: 320000
+  min_sample_size: 1000
+  min_label_size: 3032  # Empty label files have Bytesize 1780, so to exclude them set this to 1780
+  normalize: true
+  sample_rate: 16000
+  with_labels: true
+  unique_labels: "['fluff1' 'fluff2' 'o1' 'o2' 'o3' 'fluff3' 'm1' 'm2' 'm3' 'm4' 'l1' 'm5'
+ 'l2' 'l3' 'sq1' 'l4' 'l5' 'l6' 'l7' 'cl1' 'cl2' 'l8' 'l9' 'l10' 'm6'
+ 'cl3' 'l11' 'l12' 'l13' 'l14' 'l15' 'l16' 'l17' 'l18' 'l19' 'l20' 'l21'
+ 'l22' 'l23' 'l24' 'l25' 'fluff4' 'cl4' 'l26' 'l27' 'fluff5' 'fluff6'
+ 'fluff7' 'fluff8' 'ht1' 'ht2' 'ht3' 'ht4' 'l28' 'cl5' 'cl6' 'fluff9'
+ 'fluff10' 'cl7' 't1' 'h1' 'b1' 'cm' 'b2' 'p1' 'cl8' 'cl9' 'cl10' 'cl11'
+ 'b3' 'cl13' 'cl14' 'cl15' 'cl16' 'cl17' 'cl18' 'cl19' 'cl20' 'help1' 'o4'
+ 'l29' 'sq2' 'o5' 'o6' 'o7' 'o8' 'cl21' 'cl22' 'cl23' 'cl24' 'h2' 'h3'
+ 'h4' 'cl25' 'cl26' 'cl27' 'fluff11' 'cl28' 'sk1' 'y1' 'e1' 'h5' 'h6' 'h7'
+ 'cl29' 'h8' 'h9' 'h10' 'h11' 'h12' 'h13' 'h14' 'h15' 'h16' 'hu1' 'h17'
+ 'help2' 'ud1' 'hu2' 'h18' 'h19' 'h20' 'h21' 'h22' 'ht5' 'cl30' 'mo1'
+ 'h23' 'h24' 'cl31' 'sh1' 't2' 'l30' 'l31' 'l32' 'l33' 'l34' 'l35' 'h25'
+ 'h26' 'n1' 'n2' 'n3' 'n4' 'n5' 'b4' 'ht6' 't3' 't4' 'mo2' 't5' 't6' 'h27'
+ 'mo3' 'mo4' 'mo5' 't7' 'ca1' 'ca2' 'ca3' 'ca4' 'ca5' 'ca6' 'ca7' 'l36'
+ 'l37' 'ca8' 'ca9' 'ca10' 'ca11' 'ca12' 'ca13' 'm7' 'e2' 'ca14' 'ca15'
+ 'ca16' 'ca17' 'ca18' 'e3' 'm' 'sq' 'h' 'hu' 'w' 'mo' 'cl' 'b' 'up' 'd'
+ 'ht' 'pu' 'l' 't' 'wa' 'sh' 'p2' 'se' 'ca' 'pc' 'hw' 'p3' 'ud' 'e' 'c'
+ 'y' 'fluff' '-mo1' '-mo2' '-mo3' 'pc1' 'w1' 'pc2' 'w2' 'pc3' 'w3' 'pc4'
+ 'w4' 'pc5' 'w5' 'pc6' 'w6' 'pc7' 'hw1' 'w7' 'pc8' 'pc9' 'w8' 'pc10'
+ 'pc11' 'hw2' 'pc12' 'pc13' 'w9' 'pc14' 'hw3' 'pc15' 'w10' 'pc16' 'w11'
+ 'pc17' 'hw4' 'pc18' 'w12' 'pc19' 'pc20' 'w13' 'pc21' 'pc22' 'w14' 'pc23'
+ 'pc24' 'w15' 'pc25' 'pc26' 'w16' 'pc27' 'w17' 'w18' 'pc28' 'w19' 'pc29'
+ 'w20' 'pc30' 'w21' 'pc31' 'pc32' 'w22' 'pc33' 'w23' '-h1' 'm8' 'm9' 'm10'
+ 'm11' 'm12' 'm13' 'm14' 'm15' 'm16' 'y2' 'm17' 'm18' '-t1' 'm19' 'm20'
+ 'm21' 'm22' 'm23' 'wa1' 'y3' 'm24' 'm25' 'm26' 'm27' 'm28' 'm29' 'm30'
+ 'm31' 'm32' 'm33' 'm34' 'm35' '-t2' 'cl12' 'm36' 'm37' 'm38' '-mo4'
+ '-mo6' 'mo7' '-t3' '-t4' '-h2' '-sh1' 'sh2' 'y4' 'sq3' '-h3' '-t6' '-t7'
+ '-ud1' '-t8' '-t9' '-h5' '-h6' '-t10' 't11' 't12' '-t13' '-t14' 't15'
+ '-t17' '-t18' '-h7' '-t19' '-t20' 'mo8' 't21' '-sh3' '-sh4' 'cm1' 'cm2'
+ 'cm3' 'cm4' 'cm5' 'cl32' 'cl33' 'cl34' 'cl35' 'cl36' 'cl37' 'cl38' 'cl39'
+ 'cl40' 'cl41' 'cl42' 'cl43' 'cl44' 'cl45' 'cl46' 'cl47' 'cl48' 'cl49'
+ 'cl50' 'cl51' 'cl52' 'cm6' 'cl53' 'cl54' 'cl55' 'cl56' 'cl57' 'cl58'
+ 'cl59' 'cl60' 'cl61' 'cl62' 'cl63' 'cl64' 'cl65' 'cl66' 'cm7' 'cm8'
+ 'cl67' 'cl68' 'cl69' 'cl70' 'cl71' 'cl72' 'cl73' 'cl74' 'cl75' 'cl76'
+ 'cl77' 'cl78' 'cl79' 'cm9' 'cl80' 'cl81' 'cl82' 'cl83' 'cl84' 'cl85'
+ 'cl86' 'cl87' 'cl88' 'cl89' 'cl90' 'cl91' 'cl92' 'cl93' 'cl94' 'cl95'
+ 'cl96' 'cl97' 'cl98' 'cl99' '-cl100' '-cl101' '-cl102' '-cm10' 'cm11'
+ 'cl103' 'cl104' 'cl105' 'cl106' 'cl107' 'cm12' 'cl108' 'cl109' 'm39'
+ 'm40' 'm41' 'm42' 'm43' 'cl110' 'cl111' 'cl112' 'cl113' 'cl114' 'cl115'
+ 'cl116' 'cl117' 'cl118' 'cl119' 'cl120' 'cl121' 'cl122' 'cl123' 'cl124'
+ 'cl125' 'cl128' 'cm13' 'cl129' 'cl130' 'm44' 'm45' 'm46' 'cl131' 'pu1'
+ 'pu2' 'pu3' 'pu4' 'cl132' 'cl133' 'cl134' '-cl135' 'm47' 'm48' 'm49'
+ 'm50' 'm51' 'm52' 'm53' 'm54' 'm55' 'cl136' 'cl137' '-l7' '-l8' '-l9'
+ 'cl138' 'cl139' 'cl140' 'cl141' 'cl142' 'cl143' 'cl144' 'cl145' 'cl146'
+ '-m56' '-m57' 'cl147' 'cl148' 'cl149' 'cl150' 'y5' 'm58' 'm59' 'm60'
+ '-h13' 'sh5' '-o1' '-t22' 't23' '-h14' '-t24' 'cl151' 'cl152' 'cl153'
+ 'cl154' 'cl155' 'cl156' 'cl157' 'cl158' 'cl159' 'cl160' 'cl161' 'cl162'
+ 'cl163' 'cl164' 'cl165' 'cl166' 'cm14' 'cl167' 'cl168' 'cl169' 'cl170'
+ 'cl171' 'cl172' 'cl173' 'cl174' 'cl175' 'cl176' 'cl177' 'cl178' '-m61'
+ '-m62' '-m63' 'cl179' 'cl180' 'sk' 'o' '-cl2' '-cl3' '-cl4' '-cl5' '-cl7'
+ 'pu5' 'pu6' 'pu7' 'pu8' 'pu9' 'pu10' 'pu11' 'pu12' 'pu13' 'pu14' 'pu15'
+ 'pu16' 'pu17' 'pu18' 'pu19' 'pu20' 'pu21' 'pu22' 'pu23' 'pu24' 'pu25'
+ 'pu26' 'pu27' '-hu1' 'pu28' 'pu29' 'pu30' 'pu31' 'pu32' 'pu33' 'pu34'
+ 'pu35' '-o2' '-h8' '-h9' '-h10' '-h11' '-h12' '-sh2' '-h15' '-sh5' '-h16'
+ '-h17' '-sh6' '-h18' 'ud2' '-h19' '-sh7' '-sh8' '-h21' '-sh9' '-h22'
+ '-sh10' '-sh11' '-h24' '-h25' '-sh12' '-sh13' '-h27' '-h28' 'h29' 'h30'
+ 'help3' '-h31' '-h32' '-h33' '-h34' '-h35' '-sh14' '-h36' '-h37' '-h38'
+ '-h39' '-h40' '-h41' '-h42' '-h43' '-h44' '-h45' '-h46' '-h47' '-h48'
+ '-h49' '-e1' '-ht2' '-h50' '-h51' '-h52' '-h53' '-cl15' 'pu36' '-sh15'
+ 'h54' 'h55' 'h56' '-h57' '-h58' '-mo9' '-mo10' 't10' '-mo11' '-mo12'
+ 'pu37' 'help4' '-ca1' '-ca2' '-ca3' '-ca4' '-ca5' '-ca6' '-ca7' '-ca8'
+ '-ca9' '-ca10' '-ca11' '-ca12' '-ca13' '-ca14' '-ca19' '-ca20' '-ca21'
+ '-ca22' '-ca23' '-ca24' '-ca25' '-ca26' '-ca27' '-t11' 'pu38' '-mo13'
+ '-t12' '-h59' 'ca28' 'ca29' 'ca30' 'ca31' 'ca32' 'ca33' 'ca34' 'ca35'
+ 'ca36' 'ca37' '-l18' '-l19' '-t15' '-l20' '-l21' '-l22' '-l23' '-l24'
+ '-t16' '-t21' '-t23' '-h60' '-t25' '-h61' '-t26' 'h62' 'h63' '-mo14'
+ '-t27' '-t28' 'help5' 'ca38' 'ca39' 'ca40' 'ca41' 'ca42' 'ca43' 'ca44'
+ 'ca45' 'ca46' 'ca47' 'ca48' 'ca49' 'ca50' 'ca51' 'ca52' 'ca53' '-t29'
+ '-t30' '-t31' 'h64' 't32' '-t33' 't34' 'pu39' '-t35' 'mo15' 'h65' '-t36'
+ '-t37' '-t38' 't39' '-ca54' '-ca55' '-ca56' '-ca57' '-t40' '-h66' 'ca58'
+ 'ca59' 'ca60' 'ca61' 'ca62' 'ca63' 'ca64' 'ca65' 'ca66' 'ca67' 'ca68'
+ 'ca69' 'ca70' 'ca71' 'ca72']"
+  conv_feature_layers: '[(127, 63, 1)] +[(512, 10, 5)] + [(512, 3, 2)] * 3 + [(512, 3, 1)] + [(512, 2, 1)] * 2'
+  verbose_tensorboard_logging: true
+
+dataset:
+  num_workers: 20
+  # original value: 1920 seconds
+  # max_tokens / sample_rate * distributed_world_size * update_freq is the batch size in seconds
+  max_tokens: 426_667
+  skip_invalid_size_inputs_valid_test: true
+  validate_interval: 1000  # validate every N epochs, setting to 1000 or above effectively deactivates that
+  validate_interval_updates: 250  # validate every m updates after validate_after_updates,
+  # so setting this to 2000 validates every 2000 updates after validate_after_updates.
+  validate_after_updates: 10000  # dont validate until reaching this many updates, but then do a
+  # validate regardless of validate_interval_updates
+  train_subset: train_0_few_0 # we have 5770s in train_0_few_0 and a batch size of 1600s
+  valid_subset: valid_0
+
+distributed_training:
+  distributed_world_size: 4  # num of gpus -> we have 4
+  ddp_backend: legacy_ddp
+
+criterion:
+  _name: finetunecriterion
+  label_smoothing: 0.09  # 1 / num_classes as a rule of thumb
+  report_accuracy: true
+  segmentation_metrics: true
+  use_focal_loss: true  # this overrides label smoothing and uses the focal loss instead
+  metric_threshold: .175  # The minimum likelihood which is deemed a prediction
+  method: "avg"  # Parameters for the segmentation detection
+  sigma_s: 0.1
+  maxfilt_s: 0.1
+  max_duration_s: 0.5
+  lowP: 0.125
+
+optimization:
+  update_freq: [ 9 ]
+  max_update: 13000  # after the 10000 freeze updates we do 3000 normal finetuning steps -> 830.5 epochs
+  lr: [ 0.0001 ]
+
+optimizer:
+  _name: adam
+  adam_betas: (0.9,0.98)
+  adam_eps: 1e-08
+
+lr_scheduler:
+  _name: cosine  # replaced the tri stage scheduler with a cosine one
+  warmup_updates: 2000
+  warmup_init_lr: 1e-10
+  min_lr: 5e-06
+
+model:
+  _name: wav2vec_ccas_finetune
+  w2v_path: ???
+  # For the first 10k updates only the output classifier is trained,
+  # after which the Transformer is also updated.
+  # The feature encoder is not trained during fine-tuning.
+  freeze_finetune_updates: 10000
+  feature_grad_mult: 0.0
+  apply_mask: true
+  average_top_k_layers: 16 # Layers in the middle perform best, see arXiv:2105.11084 [cs.CL]
+  # Regularization terms
+  mask_prob: 1.1  # Probability - the R term in the paper - for a token being masked (Default is 0.65)
+  # The masking length if a token was chosen.
+  mask_length: 2
+  # to get the prob from the paper you have to:
+  # mask_channel_prob * num_channels (1024) / mask_channel_length / batch_size
+  mask_channel_prob: 0.5
+  mask_channel_length: 64
+  dropout: 0.1
+  dropout_input: 0.0
+  activation_dropout: 0.1
+  attention_dropout: 0.2
+  final_dropout: 0.0
+  layerdrop: 0.1
+  drop_path: 0.0
+  target_mixup: true  # Should we mixup the targets as well
+  source_mixup: 0.5  # The strength of the mixing (Uniformly sampled between this and 1.)
+  mixup_prob: 1.0  # How much of the source and targets should be mixed up (1.0 == 100%)
+  same_mixup: true  # Should we use the same strength for the full batch or use a random strength for every sample
+  mixing_window_length: 0.05  # The window length for the to-be-mixed windows in BC learning
+  gain_mode: "A_weighting"  # The mode with which the mixing gain is calculated, see BC learning paper
+  load_pretrain_weights: false  # should we attempt to load the linear eval projection layer weights from pretrain

@@ -49,6 +49,7 @@ def animal2vec_audio_main(cfg: FairseqConfig) -> None:
     """
     This is the main train routine for the animal2vec audio model
     """
+    print("Animal2vec Audio Training")
     if isinstance(cfg, argparse.Namespace):
         cfg = convert_namespace_to_omegaconf(cfg)
 

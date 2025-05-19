@@ -102,6 +102,7 @@ def flatten(l):
 
 
 def main(args):
+
     assert args.valid_percent >= 0 and args.valid_percent <= 1.0
 
     if not os.path.exists(args.dest):
@@ -132,21 +133,30 @@ def main(args):
         label_file = file_path.replace(os.sep + "wav" + os.sep, os.sep + "lbl" + os.sep)
         label_file = label_file.replace(".wav", ".h5")
         label_file_check = os.path.isfile(label_file)
+
         if label_file_check:
             with h5py.File(label_file, "r") as f:
+                print(f"[INFO] Keys in {label_file}: {list(f.keys())}")
+                if "lbl_cat" in f:
+                    print(f"[INFO] lbl_cat shape: {f['lbl_cat'].shape}, dtype: {f['lbl_cat'].dtype}")
+                    print(f"[INFO] First 5 entries: {f['lbl_cat'][:5]}")
                 categorical_label = list(f["lbl_cat"])
+
             if len(categorical_label) == 0:  # if file has no labels, but labels generally exist
                 files_without_labels.append(file_path)
+
             else:
                 # if multiple labels are present in one file we
                 # only consider the one that happened the least so far
                 cl_unique, cl_counts = np.unique(categorical_label, return_counts=True)
+
                 labels_X.append(file_path)
                 labels_y.append(cl_unique)
         else:  # if no labels exist at all
             files_without_labels.append(file_path)
 
     if len(labels_y) > 0:
+
         # Report class labels/counts and verify examples for all classes
         unique_target_classes, unique_target_class_counts = np.unique(flatten(labels_y), return_counts=True)
         print("Classes/counts:  ", end=None)
@@ -154,14 +164,13 @@ def main(args):
             print(f"{class_id}/{class_count} ", end="")
         # TODO when not all classes are in the input files it throws an error
         # TODO count is wrong when multiple signals of the same class are in the file, then, only one is counted
-        assert len(unique_target_classes) - 1 == max(unique_target_classes), \
-            f"{max(unique_target_classes)} classes exist, " \
-            f"only {len(unique_target_classes)} classes with examples:"
+
 
         targets = []
+        print("Here")
         for ll in labels_y:
             tmp_zero_target = np.zeros(len(unique_target_classes))
-            tmp_zero_target[ll] = 1
+            tmp_zero_target[ll-1] = 1
             targets.append(tmp_zero_target)
 
     if args.leave_p_out:
@@ -204,6 +213,7 @@ def main(args):
 
     sss = MultilabelStratifiedShuffleSplit(n_splits=args.n_split, test_size=args.valid_percent,
                                            random_state=args.seed)
+
     it_ = sss.split(labels_X, targets) if 0 < args.valid_percent else (np.arange(len(labels_X)), [])
 
     # pretrain files first
