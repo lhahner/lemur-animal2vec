@@ -140,6 +140,7 @@ def main(args):
                 if "lbl_cat" in f:
                     print(f"[INFO] lbl_cat shape: {f['lbl_cat'].shape}, dtype: {f['lbl_cat'].dtype}")
                     print(f"[INFO] First 5 entries: {f['lbl_cat'][:5]}")
+                    print(f"[INFO] label: {f['lbl'][:]}")
                 categorical_label = list(f["lbl_cat"])
 
             if len(categorical_label) == 0:  # if file has no labels, but labels generally exist
@@ -164,13 +165,14 @@ def main(args):
             print(f"{class_id}/{class_count} ", end="")
         # TODO when not all classes are in the input files it throws an error
         # TODO count is wrong when multiple signals of the same class are in the file, then, only one is counted
-
+        # Create a mapping from class ID to index in the one-hot vector
+        class_id_to_index = {cid: idx for idx, cid in enumerate(unique_target_classes)}
 
         targets = []
-        print("Here")
         for ll in labels_y:
             tmp_zero_target = np.zeros(len(unique_target_classes))
-            tmp_zero_target[ll-1] = 1
+            for class_id in ll:
+                tmp_zero_target[class_id_to_index[class_id]] = 1
             targets.append(tmp_zero_target)
 
     if args.leave_p_out:

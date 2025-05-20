@@ -103,6 +103,7 @@ def get_parser():
 
 
 def iteration(file, args, id_generator, labels, channel_dict):
+
     # Then we load the dataframe that was created using the "raw_labels_to_dataframe.py" script
     # Create dictionary
     random_names_dictionary = {}
@@ -148,9 +149,8 @@ def iteration(file, args, id_generator, labels, channel_dict):
                 waveform = waveform[:, 0].squeeze()  # Use the first channel if no ext info is avail.
         else:
             waveform = waveform[:, 0].squeeze()
-
+    # Sampling rate
     resample_cond = metadata.samplerate != args.resample_rate or metadata.channels != 1
-
     # Prepare the base filename for output
     # if files were structured in multiple nested folders, then encode
     # this into the new filename starting from the base input folder
@@ -223,10 +223,13 @@ def iteration(file, args, id_generator, labels, channel_dict):
 
         # Check for labels
         start_time_lbl, start_frame_lbl, end_time_lbl, end_frame_lbl, lbl, lbl_cat, foc = [], [], [], [], [], [], []
+        counter = 0
         if os.path.isfile(args.pickle_file) and labels is not None:
             for lbl_i, (s, e) in enumerate(zip(starts, ends)):
                 # If a label is fully or partial in the time interval
-                if s < from_sec_td < e or s < to_sec_td < e or from_sec_td < s < e < to_sec_td:
+                #if s < from_sec_td < e or s < to_sec_td < e or from_sec_td < s < e < to_sec_td:
+                if from_sec_td > s < to_sec_td and from_sec_td < e < to_sec_td:
+                    counter = counter + 1
                     start_time = (s - from_sec_td).total_seconds()
                     start_time_lbl.append(max(start_time, 0.))
                     start_frame_lbl.append(
@@ -245,7 +248,6 @@ def iteration(file, args, id_generator, labels, channel_dict):
 
         if not os.path.isdir(out_folder_lbl):
             os.makedirs(out_folder_lbl)
-
         f_name_lbl = f_name_base + ".h5"
         with h5py.File(os.path.join(out_folder_lbl, f_name_lbl), mode="w") as f:
             f.create_dataset(name="start_time_lbl", data=start_time_lbl)
@@ -255,8 +257,8 @@ def iteration(file, args, id_generator, labels, channel_dict):
             f.create_dataset(name="lbl", data=lbl)
             f.create_dataset(name="lbl_cat", data=lbl_cat)
             f.create_dataset(name="foc", data=foc)
+        print("Identified labels in sounds ", f_name_wav, ": ", counter)
     return total_duration, c_, random_names_dictionary
-
 
 def main(args):
     if args.randomize_file_names:
@@ -322,10 +324,10 @@ def main(args):
             futures = [executor.submit(partial_iteration, data) for data in files]
 
             results = []
-          #  for future in as_completed(futures):
-            #    result = future.result()  # Get the result (optional)
-            #    results.append(result)
-            #    pbar.update(1)  # Update the progress bar
+            for future in as_completed(futures):
+                result = future.result()  # Get the result (optional)
+                results.append(result)
+                pbar.update(1)  # Update the progress bar
 
     total_duration = sum([x[0] for x in results])
     c_ = sum([x[1] for x in results])

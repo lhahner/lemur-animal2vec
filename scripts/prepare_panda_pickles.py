@@ -3,7 +3,7 @@ import os
 from datetime import timedelta
 
 rows = []
-data_dir = '../data'  # Update to your actual directory
+data_dir = '../data/lbl'  # Update to your actual directory
 
 for file in os.listdir(data_dir):
     if file.endswith('.selections.txt'):
@@ -11,7 +11,7 @@ for file in os.listdir(data_dir):
 
         # Extract base audio filename
         audio_filename = file.replace('.Table.1.selections.txt', '.wav')
-
+        print(audio_filename)
         # Read file — tab-separated
         df = pd.read_csv(path, sep='\t')
 

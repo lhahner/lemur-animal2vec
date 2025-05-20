@@ -15,7 +15,7 @@ checkpoint:
 
 task:
   _name: audio_ccas
-  data: ../../../processed_data/Lemurs/manifests
+  data: ../../../processed_data/manifests
   unique_labels: "['fluff1' 'fluff2' 'o1' 'o2' 'o3' 'fluff3' 'm1' 'm2' 'm3' 'm4' 'l1' 'm5'
  'l2' 'l3' 'sq1' 'l4' 'l5' 'l6' 'l7' 'cl1' 'cl2' 'l8' 'l9' 'l10' 'm6'
  'cl3' 'l11' 'l12' 'l13' 'l14' 'l15' 'l16' 'l17' 'l18' 'l19' 'l20' 'l21'
@@ -101,7 +101,7 @@ task:
   enable_padding: false
 
 dataset:
-  num_workers: 32
+  num_workers: 2
   # max_tokens / sample_rate * distributed_world_size * update_freq is the batch size in seconds
   # For training on asmodeus, we use 960s for training, as in the paper
   max_tokens: 608_000  #  a token is a single audio frame
@@ -195,10 +195,10 @@ model:
       prenet_depth: 8  # The depth of the transformer based context_encoder
       # mask_prob: 0.5
       # mask_length: 5
-      mask_prob: 1.5  # Probability for a token being masked (Default is 0.65)
+      mask_prob: 0.65  # Probability for a token being masked (Default is 0.65)
       # The masking length if a token was chosen.
       # This mask_prob and mask_length will mask ~93% of the input with a median masking length of 70 ms
-      mask_length: 2
+      mask_length: 10
       mask_prob_adjust: 0.05
       inverse_mask: false
       mask_noise_std: 0.01
